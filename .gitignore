@@ -1,5 +1,24 @@
+# Ambientes virtuais e variáveis locais
 .venv/
+venv/
+.env
+
+# Cache Python e Jupyter
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ipynb_checkpoints/
+
+# Artefatos de empacotamento
+build/
+dist/
+*.egg-info/
+
+# Cobertura de testes
+.coverage
+htmlcov/
+coverage.xml
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
