@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/quantfinance/__init__.py
+src/quantfinance/linear_algebra.py
+src/quantfinance/options.py
+src/quantfinance/performance.py
+src/quantfinance/portfolio.py
+src/quantfinance/returns.py
+src/quantfinance/simulation.py
+src/quantfinance_course.egg-info/PKG-INFO
+src/quantfinance_course.egg-info/SOURCES.txt
+src/quantfinance_course.egg-info/dependency_links.txt
+src/quantfinance_course.egg-info/top_level.txt
+tests/test_quantfinance_core.py
