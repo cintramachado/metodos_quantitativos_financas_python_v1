@@ -48,7 +48,7 @@ def lower_partial_moment(
 ) -> float:
     """Return the lower partial moment E[max(threshold - R, 0)^order]."""
     values = np.asarray(returns, dtype=float)
-    if values.ndim != 1 or values.size < 1 or order < 1:
+    if values.ndim != 1 or values.size < 1 or order < 1 or not np.all(np.isfinite(values)):
         raise ValueError("returns must be non-empty and order must be positive")
     downside = np.maximum(threshold - values, 0.0)
     return float(np.mean(downside**order))
@@ -67,7 +67,7 @@ def kappa_ratio(
     moment = lower_partial_moment(values, threshold, order)
     if moment == 0:
         raise ValueError("Kappa ratio is undefined without downside observations")
-    denominator = moment ** (1.0 / order) * np.sqrt(periods)
+    denominator = moment ** (1.0 / order) * periods ** (1.0 / order)
     numerator = (values.mean() - threshold) * periods
     return float(numerator / denominator)
 

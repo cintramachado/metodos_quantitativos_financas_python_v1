@@ -97,7 +97,11 @@ def simulate_jump_diffusion(
     steps: int = 252,
     seed: int = 123,
 ) -> NDArray[np.float64]:
-    """Simulate a log-price diffusion with compound Poisson jumps."""
+    """Simulate a log-price diffusion with uncompensated compound Poisson jumps.
+
+    Here ``drift`` is the diffusion drift before adding jumps. It is not the
+    expected price growth rate after jump contributions.
+    """
     if (
         spot <= 0 or volatility < 0 or jump_intensity < 0
         or jump_volatility < 0 or horizon <= 0 or steps < 1

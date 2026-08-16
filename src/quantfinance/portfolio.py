@@ -34,8 +34,17 @@ def portfolio_volatility(weights: ArrayLike, covariance: ArrayLike) -> float:
 def gmv_weights(covariance: ArrayLike) -> NDArray[np.float64]:
     """Return unconstrained global minimum-variance portfolio weights."""
     matrix = np.asarray(covariance, dtype=float)
-    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-        raise ValueError("covariance must be square")
+    if (
+        matrix.ndim != 2
+        or matrix.shape[0] != matrix.shape[1]
+        or not np.all(np.isfinite(matrix))
+        or not np.allclose(matrix, matrix.T)
+    ):
+        raise ValueError("covariance must be finite, square, and symmetric")
+    try:
+        np.linalg.cholesky(matrix)
+    except np.linalg.LinAlgError as error:
+        raise ValueError("covariance must be positive definite") from error
     ones = np.ones(matrix.shape[0])
     solution = np.linalg.solve(matrix, ones)
     denominator = float(ones @ solution)
@@ -60,6 +69,8 @@ def _bounds(n_assets: int, long_only: bool, bounds: tuple[float, float] | None) 
     if bounds is not None and bounds[0] > bounds[1]:
         raise ValueError("bounds lower limit must not exceed upper limit")
     lower, upper = bounds if bounds is not None else ((0.0, 1.0) if long_only else (-np.inf, np.inf))
+    if long_only and lower < 0:
+        raise ValueError("long-only portfolios cannot have a negative lower bound")
     return [(lower, upper)] * n_assets
 
 
@@ -70,8 +81,8 @@ def global_minimum_variance(
 ) -> NDArray[np.float64]:
     """Return GMV weights analytically or with constraints."""
     matrix = np.asarray(covariance, dtype=float)
-    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-        raise ValueError("covariance must be square")
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or not np.all(np.isfinite(matrix)) or not np.allclose(matrix, matrix.T):
+        raise ValueError("covariance must be finite, square, and symmetric")
     if not long_only and bounds is None:
         return gmv_weights(matrix)
     n_assets = matrix.shape[0]

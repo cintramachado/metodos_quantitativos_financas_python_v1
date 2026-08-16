@@ -28,6 +28,8 @@ def test_covariance_correlation_identity():
         covariance,
         np.diag(volatilities) @ correlation @ np.diag(volatilities),
     )
+    with pytest.raises(ValueError):
+        correlation_to_covariance([[1.0, 1.2], [1.2, 1.0]], [0.1, 0.2])
 
 
 def test_portfolio_variance_and_volatility_include_covariances():

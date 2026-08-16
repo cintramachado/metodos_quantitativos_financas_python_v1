@@ -46,6 +46,8 @@ def test_gmv_formula_and_constrained_solution(portfolio_inputs):
     assert long_only.sum() == pytest.approx(1.0)
     assert np.all(long_only >= -1e-8)
     assert portfolio_variance(long_only, covariance) >= portfolio_variance(result, covariance) - 1e-10
+    with pytest.raises(ValueError):
+        global_minimum_variance(covariance, long_only=True, bounds=(-1.0, 1.0))
 
 
 def test_frontier_target_and_tangency(portfolio_inputs):

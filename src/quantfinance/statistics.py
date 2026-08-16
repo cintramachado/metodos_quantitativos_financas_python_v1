@@ -10,12 +10,11 @@ def descriptive_statistics(returns: ArrayLike) -> dict[str, float]:
     values = np.asarray(returns, dtype=float)
     if values.ndim != 1 or values.size < 2 or not np.all(np.isfinite(values)):
         raise ValueError("returns must be a finite one-dimensional sample")
-    centered = values - values.mean()
     standard_deviation = values.std(ddof=1)
     if standard_deviation == 0:
         raise ValueError("returns must have non-zero variance")
-    skewness = np.mean(centered**3) / standard_deviation**3
-    kurtosis = np.mean(centered**4) / standard_deviation**4 - 3.0
+    skewness = stats.skew(values, bias=False)
+    kurtosis = stats.kurtosis(values, fisher=True, bias=False)
     return {
         "mean": float(values.mean()),
         "variance": float(values.var(ddof=1)),

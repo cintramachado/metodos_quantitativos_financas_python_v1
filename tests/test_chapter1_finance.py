@@ -23,6 +23,9 @@ def test_discrete_and_continuous_compounding():
     assert future_value(100.0, 0.10, 2) == pytest.approx(121.0)
     assert present_value(121.0, 0.10, 2) == pytest.approx(100.0)
     assert continuous_compounding(100.0, 0.10, 2.0) == pytest.approx(100.0 * np.exp(0.2))
+    assert future_value(100.0, -0.5, 2, compounds_per_year=2) == pytest.approx(100.0 * 0.75**4)
+    with pytest.raises(ValueError):
+        future_value(100.0, -2.0, 1, compounds_per_year=2)
 
 
 def test_duration_and_convexity_are_positive():

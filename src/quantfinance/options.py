@@ -75,6 +75,9 @@ def implied_volatility_bisection(
     """Find call implied volatility with a bracketed bisection method."""
     if price < 0 or lower <= 0 or upper <= lower:
         raise ValueError("price and volatility bracket are invalid")
+    lower_bound = max(spot - strike * np.exp(-rate * maturity), 0.0)
+    if price < lower_bound or price >= spot:
+        raise ValueError("call price violates Black-Scholes no-arbitrage bounds")
     return bisection(
         lambda volatility: black_scholes_call(spot, strike, maturity, rate, volatility) - price,
         lower,
@@ -95,8 +98,11 @@ def implied_volatility_newton(
     max_iterations: int = 100,
 ) -> float:
     """Find call implied volatility with Newton-Raphson and Black-Scholes vega."""
-    if price < 0:
+    if price < 0 or initial_volatility <= 0:
         raise ValueError("price must be non-negative")
+    lower_bound = max(spot - strike * np.exp(-rate * maturity), 0.0)
+    if price < lower_bound or price >= spot:
+        raise ValueError("call price violates Black-Scholes no-arbitrage bounds")
     return newton_raphson(
         lambda volatility: black_scholes_call(spot, strike, maturity, rate, volatility) - price,
         lambda volatility: _black_scholes_vega(spot, strike, maturity, rate, volatility),
@@ -120,16 +126,16 @@ def implied_volatility(
     if price < 0 or initial_volatility <= 0 or tolerance <= 0 or max_iterations < 1:
         raise ValueError("price, initial volatility, tolerance and iterations are invalid")
     _validate_parameters(spot, strike, maturity, initial_volatility)
-    return implied_volatility_newton(
-        price,
-        spot,
-        strike,
-        maturity,
-        rate,
-        initial_volatility,
-        tolerance,
-        max_iterations,
-    )
+    try:
+        return implied_volatility_newton(
+            price, spot, strike, maturity, rate,
+            initial_volatility, tolerance, max_iterations,
+        )
+    except (RuntimeError, ValueError):
+        return implied_volatility_bisection(
+            price, spot, strike, maturity, rate,
+            tolerance=tolerance, max_iterations=max_iterations * 2,
+        )
 
 
 def finite_difference_delta(

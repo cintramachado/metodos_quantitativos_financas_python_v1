@@ -63,27 +63,29 @@ def ols_numpy(
         raise ValueError("design must have more observations than parameters")
     if not np.all(np.isfinite(response)):
         raise ValueError("target must be finite")
-    gram = design.T @ design
-    if np.linalg.matrix_rank(gram) < gram.shape[0]:
+    if np.linalg.matrix_rank(design) < design.shape[1]:
         raise ValueError("design matrix is singular or perfectly collinear")
-    coefficients = np.linalg.inv(gram) @ design.T @ response
+    coefficients, _, _, _ = np.linalg.lstsq(design, response, rcond=None)
+    gram = design.T @ design
     fitted_values = design @ coefficients
     residuals = response - fitted_values
     observations, parameters = design.shape
     degrees_of_freedom = observations - parameters
     rss = float(residuals @ residuals)
     centered = response - response.mean()
-    tss = float(centered @ centered)
+    has_intercept = np.any(np.all(np.isclose(design, 1.0), axis=0))
+    tss = float(centered @ centered) if has_intercept else float(response @ response)
     if tss <= 0:
         raise ValueError("target must have positive total variation")
     r_squared = 1.0 - rss / tss
     adjusted_r_squared = 1.0 - (1.0 - r_squared) * (observations - 1) / degrees_of_freedom
     residual_variance = rss / degrees_of_freedom
-    covariance = residual_variance * np.linalg.inv(gram)
+    covariance = residual_variance * np.linalg.pinv(gram)
     standard_errors = np.sqrt(np.diag(covariance))
     t_statistics = coefficients / standard_errors
     explained = tss - rss
-    f_statistic = float((explained / (parameters - 1)) / residual_variance) if parameters > 1 else np.nan
+    numerator_df = parameters - 1 if has_intercept else parameters
+    f_statistic = float((explained / numerator_df) / residual_variance) if numerator_df > 0 else np.nan
     return OLSResult(
         coefficients=coefficients,
         fitted_values=fitted_values,

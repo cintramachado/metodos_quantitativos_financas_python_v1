@@ -11,7 +11,13 @@ def present_value(
     compounds_per_year: int = 1,
 ) -> float:
     """Discount a future value with discrete compounding."""
-    if future_value < 0 or rate <= -1 or periods < 0 or compounds_per_year < 1:
+    if (
+        future_value < 0
+        or not np.isfinite(rate)
+        or rate <= -compounds_per_year
+        or periods < 0
+        or compounds_per_year < 1
+    ):
         raise ValueError("invalid future value, rate, periods, or compounding frequency")
     return float(future_value / (1.0 + rate / compounds_per_year) ** (periods * compounds_per_year))
 
@@ -23,7 +29,13 @@ def future_value(
     compounds_per_year: int = 1,
 ) -> float:
     """Accumulate a present value with discrete compounding."""
-    if present_value_amount < 0 or rate <= -1 or periods < 0 or compounds_per_year < 1:
+    if (
+        present_value_amount < 0
+        or not np.isfinite(rate)
+        or rate <= -compounds_per_year
+        or periods < 0
+        or compounds_per_year < 1
+    ):
         raise ValueError("invalid present value, rate, periods, or compounding frequency")
     return float(present_value_amount * (1.0 + rate / compounds_per_year) ** (periods * compounds_per_year))
 

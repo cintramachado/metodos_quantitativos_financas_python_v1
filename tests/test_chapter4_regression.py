@@ -60,3 +60,17 @@ def test_regression_diagnostics_return_expected_metrics():
         "breusch_godfrey_lm_pvalue",
     }
     assert 0 <= diagnostics["durbin_watson"] <= 4
+
+
+def test_ols_without_intercept_uses_uncentered_fit_statistics():
+    predictor = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    target = 2.0 * predictor
+    result = ols_numpy(predictor[:, None], target)
+    assert result.coefficients[0] == pytest.approx(2.0)
+    assert result.r_squared == pytest.approx(1.0)
+
+
+def test_ols_rejects_singular_design():
+    features = np.column_stack([np.ones(5), np.arange(5), np.arange(5)])
+    with pytest.raises(ValueError):
+        ols_numpy(features, np.arange(5, dtype=float))

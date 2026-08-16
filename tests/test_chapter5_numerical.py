@@ -37,6 +37,8 @@ def test_implied_volatility_bisection_and_newton():
     target = black_scholes_call(100.0, 100.0, 1.0, 0.05, 0.30)
     assert implied_volatility_bisection(target, 100.0, 100.0, 1.0, 0.05) == pytest.approx(0.30, abs=1e-7)
     assert implied_volatility_newton(target, 100.0, 100.0, 1.0, 0.05) == pytest.approx(0.30, abs=1e-7)
+    with pytest.raises(ValueError):
+        implied_volatility_bisection(0.0, 100.0, 100.0, 1.0, 0.05)
 
 
 def test_finite_difference_greeks_match_analytic_values():

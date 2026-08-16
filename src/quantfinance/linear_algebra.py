@@ -57,6 +57,10 @@ def correlation_to_covariance(
 ) -> NDArray[np.float64]:
     """Convert correlation C into covariance Sigma = D C D."""
     matrix = _square_symmetric_matrix(correlation, "correlation")
+    if not np.allclose(np.diag(matrix), 1.0) or np.any(np.abs(matrix) > 1.0):
+        raise ValueError("correlation must have unit diagonal and entries in [-1, 1]")
+    if np.min(np.linalg.eigvalsh(matrix)) < -1e-10:
+        raise ValueError("correlation must be positive semidefinite")
     deviations = np.asarray(volatilities, dtype=float)
     if deviations.ndim != 1 or deviations.size != matrix.shape[0]:
         raise ValueError("volatilities must match the correlation dimensions")
